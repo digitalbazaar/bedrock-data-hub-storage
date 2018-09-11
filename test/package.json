@@ -1,9 +1,12 @@
 {
-  "name": "bedrock-private-remote-storage",
+  "name": "bedrock-private-remote-storage-test",
   "version": "0.0.1-0",
-  "description": "Private remote storage for Bedrock application user accounts",
+  "description": "Bedrock private remote storage test",
+  "private": true,
   "main": "./lib",
-  "scripts": {},
+  "scripts": {
+    "test": "node --preserve-symlinks test.js test"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/digitalbazaar/bedrock-private-remote-storage"
@@ -21,19 +24,20 @@
   },
   "homepage": "https://github.com/digitalbazaar/bedrock-private-remote-storage",
   "dependencies": {
-    "assert-plus": "^1.0.0"
-  },
-  "peerDependencies": {
+    "axios": "^0.18.0",
     "bedrock": "^1.12.1",
     "bedrock-account": "^1.0.0",
+    "bedrock-did-client": "^1.1.2",
     "bedrock-express": "^2.0.8",
+    "bedrock-identity": "^5.0.0",
+    "bedrock-key": "^5.1.2",
+    "bedrock-mongodb": "^5.1.2",
     "bedrock-passport": "^4.0.2",
     "bedrock-permission": "^2.5.0",
-    "bedrock-mongodb": "3.x - 5.x",
+    "bedrock-private-remote-storage": "file:..",
     "bedrock-server": "^2.3.2",
-    "bedrock-validation": "^2.4.0"
-  },
-  "directories": {
-    "lib": "./lib"
+    "bedrock-test": "^2.0.0",
+    "bedrock-validation": "^2.4.0",
+    "uuid": "^3.2.1"
   }
 }

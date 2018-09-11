@@ -8,39 +8,29 @@ const masterKey = {
   type: 'object',
   required: true,
   properties: {
-    id: {
-      type: 'string',
-      required: true
-    },
-    jwe: {
+    unprotected: {
       type: 'object',
       required: true,
       properties: {
-        unprotected: {
-          type: 'object',
-          required: true,
-          properties: {
-            alg: {
-              type: 'string',
-              required: true
-            },
-            p2c: {
-              type: 'integer',
-              required: false
-            },
-            p2s: {
-              type: 'string',
-              required: false
-            }
-          },
-          // allow other encryption mechanisms
-          additionalProperties: true
-        },
-        encrypted_key: {
+        alg: {
           type: 'string',
           required: true
+        },
+        p2c: {
+          type: 'integer',
+          required: false
+        },
+        p2s: {
+          type: 'string',
+          required: false
         }
-      }
+      },
+      // allow other encryption mechanisms
+      additionalProperties: true
+    },
+    encrypted_key: {
+      type: 'string',
+      required: true
     }
   }
 };
