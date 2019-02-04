@@ -37,8 +37,8 @@ api.prepareDatabase = async mockData => {
 api.removeCollections = async (
   collectionNames = [
     'account',
-    'privateRemoteStorage',
-    'privateRemoteStorageKey']) => {
+    'dataHub',
+    'dataHubKey']) => {
   await promisify(database.openCollections)(collectionNames);
   for(const collectionName of collectionNames) {
     await database.collections[collectionName].remove({});

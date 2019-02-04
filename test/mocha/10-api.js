@@ -3,14 +3,14 @@
  */
 'use strict';
 
-const brPrivateRemoteStorage = require('bedrock-private-remote-storage');
+const brDataHubStorage = require('bedrock-data-hub-storage');
 const database = require('bedrock-mongodb');
 const helpers = require('./helpers');
 const mockData = require('./mock.data');
 let actors;
 let accounts;
 
-describe('bedrock-private-remote-storage', () => {
+describe('bedrock-data-hub-storage', () => {
   before(async () => {
     await helpers.prepareDatabase(mockData);
     actors = await helpers.getActors(mockData);
@@ -21,7 +21,7 @@ describe('bedrock-private-remote-storage', () => {
     it('should insert a master key', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      let record = await brPrivateRemoteStorage.insertKey({
+      let record = await brDataHubStorage.insertKey({
         actor,
         accountId: account.id,
         key: mockData.masterKey
@@ -29,7 +29,7 @@ describe('bedrock-private-remote-storage', () => {
       should.exist(record);
       record.accountId.should.equal(database.hash(account.id));
       record.key.should.deep.equal(mockData.masterKey);
-      record = await database.collections.privateRemoteStorageKey.findOne({
+      record = await database.collections.dataHubKey.findOne({
         accountId: database.hash(account.id)
       });
       record.accountId.should.equal(database.hash(account.id));
@@ -40,7 +40,7 @@ describe('bedrock-private-remote-storage', () => {
       let err;
       let record;
       try {
-        record = await brPrivateRemoteStorage.insertKey({
+        record = await brDataHubStorage.insertKey({
           actor,
           accountId: 'urn:uuid:something-else',
           key: mockData.masterKey
@@ -58,7 +58,7 @@ describe('bedrock-private-remote-storage', () => {
     it('should insert an encrypted document', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      let record = await brPrivateRemoteStorage.insert({
+      let record = await brDataHubStorage.insert({
         actor,
         accountId: account.id,
         doc: mockData.encryptedDocument
@@ -66,7 +66,7 @@ describe('bedrock-private-remote-storage', () => {
       should.exist(record);
       record.accountId.should.equal(database.hash(account.id));
       record.doc.should.deep.equal(mockData.encryptedDocument);
-      record = await database.collections.privateRemoteStorage.findOne({
+      record = await database.collections.dataHub.findOne({
         accountId: database.hash(account.id),
         id: database.hash(mockData.encryptedDocument.id)
       });
@@ -76,7 +76,7 @@ describe('bedrock-private-remote-storage', () => {
     it('should insert an encrypted document with attribute', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      let record = await brPrivateRemoteStorage.insert({
+      let record = await brDataHubStorage.insert({
         actor,
         accountId: account.id,
         doc: mockData.encryptedDocumentWithAttribute
@@ -84,7 +84,7 @@ describe('bedrock-private-remote-storage', () => {
       should.exist(record);
       record.accountId.should.equal(database.hash(account.id));
       record.doc.should.deep.equal(mockData.encryptedDocumentWithAttribute);
-      record = await database.collections.privateRemoteStorage.findOne({
+      record = await database.collections.dataHub.findOne({
         accountId: database.hash(account.id),
         id: database.hash(mockData.encryptedDocumentWithAttribute.id)
       });
@@ -97,7 +97,7 @@ describe('bedrock-private-remote-storage', () => {
       // attempt to insert the same account again
       let err;
       try {
-        await brPrivateRemoteStorage.insert({
+        await brDataHubStorage.insert({
           actor,
           accountId: account.id,
           doc: mockData.encryptedDocument
@@ -113,7 +113,7 @@ describe('bedrock-private-remote-storage', () => {
       let err;
       let record;
       try {
-        record = await brPrivateRemoteStorage.insert({
+        record = await brDataHubStorage.insert({
           actor,
           accountId: 'urn:uuid:something-else',
           doc: mockData.encryptedDocument
@@ -131,12 +131,12 @@ describe('bedrock-private-remote-storage', () => {
     it('should upsert an encrypted document', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      await brPrivateRemoteStorage.update({
+      await brDataHubStorage.update({
         actor,
         accountId: account.id,
         doc: mockData.encryptedDocument2
       });
-      const record = await database.collections.privateRemoteStorage.findOne({
+      const record = await database.collections.dataHub.findOne({
         accountId: database.hash(account.id),
         id: database.hash(mockData.encryptedDocument2.id)
       });
@@ -147,12 +147,12 @@ describe('bedrock-private-remote-storage', () => {
     it('should update an encrypted document', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      await brPrivateRemoteStorage.update({
+      await brDataHubStorage.update({
         actor,
         accountId: account.id,
         doc: mockData.encryptedDocument
       });
-      const record = await database.collections.privateRemoteStorage.findOne({
+      const record = await database.collections.dataHub.findOne({
         accountId: database.hash(account.id),
         id: database.hash(mockData.encryptedDocument.id)
       });
@@ -164,7 +164,7 @@ describe('bedrock-private-remote-storage', () => {
       let err;
       let record;
       try {
-        record = await brPrivateRemoteStorage.update({
+        record = await brDataHubStorage.update({
           actor,
           accountId: 'urn:uuid:something-else',
           doc: mockData.encryptedDocument
@@ -182,7 +182,7 @@ describe('bedrock-private-remote-storage', () => {
     it('should get an encrypted document', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      const record = await brPrivateRemoteStorage.get({
+      const record = await brDataHubStorage.get({
         actor,
         accountId: account.id,
         id: mockData.encryptedDocument.id
@@ -195,7 +195,7 @@ describe('bedrock-private-remote-storage', () => {
       let err;
       let record;
       try {
-        record = await brPrivateRemoteStorage.get({
+        record = await brDataHubStorage.get({
           actor,
           accountId: 'urn:uuid:something-else',
           id: mockData.encryptedDocument.id
@@ -213,7 +213,7 @@ describe('bedrock-private-remote-storage', () => {
       let err;
       let record;
       try {
-        record = await brPrivateRemoteStorage.get({
+        record = await brDataHubStorage.get({
           actor,
           accountId: account.id,
           id: 'urn:does-not-exist'
@@ -232,7 +232,7 @@ describe('bedrock-private-remote-storage', () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
       const [attribute] = mockData.encryptedDocumentWithAttribute.attributes;
-      const records = await brPrivateRemoteStorage.find({
+      const records = await brDataHubStorage.find({
         actor,
         accountId: account.id,
         query: {
@@ -251,7 +251,7 @@ describe('bedrock-private-remote-storage', () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
       const [attribute] = mockData.encryptedDocumentWithAttribute.attributes;
-      const records = await brPrivateRemoteStorage.find({
+      const records = await brDataHubStorage.find({
         actor,
         accountId: account.id,
         query: {
@@ -269,7 +269,7 @@ describe('bedrock-private-remote-storage', () => {
     it('should find no results', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      const records = await brPrivateRemoteStorage.find({
+      const records = await brDataHubStorage.find({
         actor,
         accountId: account.id,
         query: {
@@ -286,7 +286,7 @@ describe('bedrock-private-remote-storage', () => {
       let err;
       let records;
       try {
-        records = await brPrivateRemoteStorage.find({
+        records = await brDataHubStorage.find({
           actor,
           accountId: 'urn:uuid:something-else',
           query: {
@@ -308,14 +308,14 @@ describe('bedrock-private-remote-storage', () => {
     it('should remove an encrypted document', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      const result = await brPrivateRemoteStorage.remove({
+      const result = await brDataHubStorage.remove({
         actor,
         accountId: account.id,
         id: mockData.encryptedDocument.id
       });
       should.exist(result);
       result.should.equal(true);
-      const record = await database.collections.privateRemoteStorage.findOne({
+      const record = await database.collections.dataHub.findOne({
         accountId: database.hash(account.id),
         id: database.hash(mockData.encryptedDocument.id)
       });
@@ -324,14 +324,14 @@ describe('bedrock-private-remote-storage', () => {
     it('should return `false` for a missing document', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      const result = await brPrivateRemoteStorage.remove({
+      const result = await brDataHubStorage.remove({
         actor,
         accountId: account.id,
         id: mockData.encryptedDocument.id
       });
       should.exist(result);
       result.should.equal(false);
-      const record = await database.collections.privateRemoteStorage.findOne({
+      const record = await database.collections.dataHub.findOne({
         accountId: database.hash(account.id),
         id: database.hash(mockData.encryptedDocument.id)
       });
@@ -342,7 +342,7 @@ describe('bedrock-private-remote-storage', () => {
       let err;
       let records;
       try {
-        records = await brPrivateRemoteStorage.remove({
+        records = await brDataHubStorage.remove({
           actor,
           accountId: 'urn:uuid:something-else',
           id: mockData.encryptedDocument.id
@@ -355,4 +355,4 @@ describe('bedrock-private-remote-storage', () => {
       err.name.should.equal('PermissionDenied');
     });
   }); // end `remove`
-}); // end bedrock-private-remote-storage
+}); // end bedrock-data-hub-storage

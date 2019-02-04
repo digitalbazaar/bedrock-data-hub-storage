@@ -6,17 +6,17 @@
 const {config} = require('bedrock');
 const path = require('path');
 require('bedrock-permission');
-require('bedrock-private-remote-storage');
+require('bedrock-data-hub-storage');
 
 const {permissions, roles} = config.permission;
 
 config.mocha.tests.push(path.join(__dirname, 'mocha'));
 
 // mongodb config
-config.mongodb.name = 'bedrock_private_remote_storage_test';
+config.mongodb.name = 'bedrock_data_hub_storage_test';
 config.mongodb.host = 'localhost';
 config.mongodb.port = 27017;
-config.mongodb.local.collection = 'bedrock_private_remote_storage_test';
+config.mongodb.local.collection = 'bedrock_data_hub_storage_test';
 // drop all collections on initialization
 config.mongodb.dropCollections = {};
 config.mongodb.dropCollections.onInit = true;
