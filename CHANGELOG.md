@@ -1,4 +1,4 @@
-# bedrock-private-remote-storage ChangeLog
+# bedrock-data-hub-storage ChangeLog
 
 ## 0.1.0 - 2018-xx-xx
 

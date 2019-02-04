@@ -3,7 +3,7 @@
  */
 'use strict';
 
-require('bedrock-private-remote-storage');
+require('bedrock-data-hub-storage');
 const https = require('https');
 // allow self-signed cert for tests
 const axios = require('axios').create({
@@ -30,7 +30,7 @@ brPassport.authenticateAll = ({req}) => {
   };
 };
 
-describe('bedrock-private-remote-storage HTTP API', () => {
+describe('bedrock-data-hub-storage HTTP API', () => {
   before(async () => {
     await helpers.prepareDatabase(mockData);
     actors = await helpers.getActors(mockData);
@@ -39,8 +39,8 @@ describe('bedrock-private-remote-storage HTTP API', () => {
     // common URLs
     const account = accounts['alpha@example.com'].account;
     const {baseUri} = config.server;
-    const root = `${baseUri}/private-storage/${encodeURIComponent(account.id)}`;
-    const invalid = `${baseUri}/private-storage/invalid`;
+    const root = `${baseUri}/data-hub/${encodeURIComponent(account.id)}`;
+    const invalid = `${baseUri}/data-hub/invalid`;
     urls = {
       documents: `${root}/documents`,
       masterKey: `${root}/master-key`,
@@ -336,4 +336,4 @@ describe('bedrock-private-remote-storage HTTP API', () => {
       err.response.data.type.should.equal('PermissionDenied');
     });
   }); // end `delete`
-}); // end bedrock-private-remote-storage
+}); // end bedrock-data-hub-storage

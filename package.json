@@ -1,12 +1,12 @@
 {
-  "name": "bedrock-private-remote-storage",
+  "name": "bedrock-data-hub-storage",
   "version": "0.0.1-0",
-  "description": "Private remote storage for Bedrock application user accounts",
+  "description": "Bedrock Data Hub Storage",
   "main": "./lib",
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/digitalbazaar/bedrock-private-remote-storage"
+    "url": "https://github.com/digitalbazaar/bedrock-data-hub-storage"
   },
   "keywords": [
     "bedrock"
@@ -17,9 +17,9 @@
     "url": "http://digitalbazaar.com"
   },
   "bugs": {
-    "url": "https://github.com/digitalbazaar/bedrock-private-remote-storage/issues"
+    "url": "https://github.com/digitalbazaar/bedrock-data-hub-storage/issues"
   },
-  "homepage": "https://github.com/digitalbazaar/bedrock-private-remote-storage",
+  "homepage": "https://github.com/digitalbazaar/bedrock-data-hub-storage",
   "dependencies": {
     "assert-plus": "^1.0.0"
   },

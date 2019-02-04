@@ -1,2 +1,2 @@
-# bedrock-private-remote-storage
-Private remote storage for Bedrock apps
+# bedrock-data-hub-storage
+Bedrock Data Hub Storage
