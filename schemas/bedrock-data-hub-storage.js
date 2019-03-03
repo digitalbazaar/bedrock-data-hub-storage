@@ -1,145 +1,177 @@
 /*!
- * Copyright (c) 2018 Digital Bazaar, Inc. All rights reserved.
+ * Copyright (c) 2018-2019 Digital Bazaar, Inc. All rights reserved.
  */
 'use strict';
 
-const masterKey = {
-  title: 'Wrapped Master Key',
+const dataHubConfig = {
+  title: 'Data Hub Configuration',
   type: 'object',
-  required: true,
-  properties: {
-    unprotected: {
-      type: 'object',
-      required: true,
-      properties: {
-        alg: {
-          type: 'string',
-          required: true
-        },
-        p2c: {
-          type: 'integer',
-          required: false
-        },
-        p2s: {
-          type: 'string',
-          required: false
-        }
-      },
-      // allow other encryption mechanisms
-      additionalProperties: true
-    },
-    encrypted_key: {
-      type: 'string',
-      required: true
-    }
-  }
-};
-
-const encryptedDocument = {
-  title: 'Encrypted Document',
-  type: 'object',
-  required: true,
+  // TODO: do not require primary `kek` and `hmac` in the future
+  required: ['sequence', 'controller', 'kek', 'hmac'],
+  additionalProperties: false,
   properties: {
     id: {
-      type: 'string',
-      required: true
+      type: 'string'
     },
-    attributes: {
-      type: 'array',
-      required: false,
-      items: [{
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-            required: true
-          },
-          value: {
-            type: 'string',
-            required: true
-          }
-        }
-      }]
+    controller: {
+      type: 'string'
     },
-    jwe: {
+    kek: {
       type: 'object',
-      required: true,
+      required: ['id', 'algorithm'],
       properties: {
-        unprotected: {
-          type: 'object',
-          required: true,
-          properties: {
-            alg: {
-              type: 'string',
-              required: true
-            },
-            enc: {
-              type: 'string',
-              required: true
-            }
-          }
+        id: {
+          type: 'string'
         },
-        encrypted_key: {
-          type: 'string',
-          required: true
+        algorithm: {
+          type: 'string'
+        }
+      }
+    },
+    hmac: {
+      type: 'object',
+      required: ['id', 'algorithm'],
+      properties: {
+        id: {
+          type: 'string'
         },
-        iv: {
-          type: 'string',
-          required: true
-        },
-        ciphertext: {
-          type: 'string',
-          required: true
-        },
-        tag: {
-          type: 'string',
-          required: true
+        algorithm: {
+          type: 'string'
         }
       }
     }
   }
 };
 
-const equalsQuery = {
-  title: 'Encrypted Document Equals Query',
+const jwe = {
+  title: 'JWE with at least one recipient',
   type: 'object',
-  required: true,
+  required: ['protected', 'recipients', 'iv', 'ciphertext', 'tag'],
   properties: {
-    equals: {
+    protected: {
+      type: 'string'
+    },
+    recipients: {
       type: 'array',
-      required: true,
+      minItems: 1,
       items: [{
         type: 'object',
-        required: true
-        // items will be `key: value` pairs where values are strings but
-        // keys are free-form
+        required: ['alg', 'kid', 'encrypted_key'],
+        properties: {
+          alg: {
+            type: 'string'
+          },
+          kid: {
+            type: 'string'
+          },
+          encrypted_key: {
+            type: 'string'
+          }
+        }
+      }]
+    },
+    iv: {
+      type: 'string'
+    },
+    ciphertext: {
+      type: 'string'
+    },
+    tag: {
+      type: 'string'
+    }
+  }
+};
+
+const indexedEntry = {
+  title: 'Data Hub Indexed Entry',
+  type: 'object',
+  required: ['hmac', 'sequence', 'attributes'],
+  properties: {
+    hmac: {
+      type: 'object',
+      required: ['id', 'algorithm'],
+      properties: {
+        id: {
+          type: 'string'
+        },
+        algorithm: {
+          type: 'string'
+        }
+      }
+    },
+    sequence: {
+      type: 'number'
+    },
+    attributes: {
+      type: 'array',
+      items: [{
+        type: 'object',
+        required: ['name', 'value'],
+        properties: {
+          name: {
+            type: 'string'
+          },
+          value: {
+            type: 'string'
+          }
+        }
       }]
     }
   }
 };
 
-const hasQuery = {
-  title: 'Encrypted Document Has Query',
+const dataHubDocument = {
+  title: 'Data Hub Document',
   type: 'object',
-  required: true,
+  required: ['id', 'sequence', 'jwe'],
+  additionalProperties: false,
   properties: {
-    has: {
+    id: {
+      type: 'string'
+    },
+    sequence: {
+      type: 'number'
+    },
+    indexed: {
       type: 'array',
-      required: true,
-      items: [{
-        type: 'string',
-        required: true
-      }]
-    }
+      items: [indexedEntry]
+    },
+    jwe
   }
 };
 
 const query = {
-  title: 'Encrypted Document Query',
-  type: [equalsQuery, hasQuery],
-  required: true
+  title: 'Data Hub Document Query',
+  type: 'object',
+  required: ['index'],
+  anyOf: [
+    {required: ['equals']},
+    {required: ['has']}
+  ],
+  additionalProperties: false,
+  properties: {
+    index: {
+      type: 'string'
+    },
+    equals: {
+      type: 'array',
+      minItems: 1,
+      items: [{
+        type: 'object',
+        // items will be `key: value` pairs where values are strings but
+        // keys are free-form
+      }]
+    },
+    has: {
+      type: 'array',
+      minItems: 1,
+      items: [{
+        type: 'string'
+      }]
+    }
+  }
 };
 
-module.exports.masterKey = () => masterKey;
-module.exports.encryptedDocument = () => encryptedDocument;
+module.exports.config = () => dataHubConfig;
+module.exports.document = () => dataHubDocument;
 module.exports.query = () => query;
