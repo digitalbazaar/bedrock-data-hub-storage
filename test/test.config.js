@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2018 Digital Bazaar, Inc. All rights reserved.
+/*!
+ * Copyright (c) 2018-2019 Digital Bazaar, Inc. All rights reserved.
  */
 'use strict';
 
@@ -30,8 +30,12 @@ roles['bedrock-account.regular'] = {
     permissions.ACCOUNT_ACCESS.id,
     permissions.ACCOUNT_UPDATE.id,
     permissions.ACCOUNT_INSERT.id,
-    permissions.PRIVATE_REMOTE_STORAGE_ACCESS.id,
-    permissions.PRIVATE_REMOTE_STORAGE_UPDATE.id,
-    permissions.PRIVATE_REMOTE_STORAGE_REMOVE.id
+    permissions.DATA_HUB_CONFIG_ACCESS.id,
+    permissions.DATA_HUB_CONFIG_UPDATE.id,
+    permissions.DATA_HUB_CONFIG_REMOVE.id,
+    permissions.DATA_HUB_STORAGE_ACCESS.id,
+    permissions.DATA_HUB_DOCUMENT_ACCESS.id,
+    permissions.DATA_HUB_DOCUMENT_UPDATE.id,
+    permissions.DATA_HUB_DOCUMENT_REMOVE.id
   ]
 };

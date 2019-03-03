@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2018 Digital Bazaar, Inc. All rights reserved.
+/*!
+ * Copyright (c) 2018-2019 Digital Bazaar, Inc. All rights reserved.
  */
 'use strict';
 
@@ -9,42 +9,42 @@ const helpers = require('./helpers');
 const mockData = require('./mock.data');
 let actors;
 let accounts;
+let dataHubId;
 
-describe('bedrock-data-hub-storage', () => {
+describe.only('bedrock-data-hub-storage', () => {
   before(async () => {
     await helpers.prepareDatabase(mockData);
     actors = await helpers.getActors(mockData);
     accounts = mockData.accounts;
   });
 
-  describe('insertKey', () => {
-    it('should insert a master key', async () => {
+  describe('insertConfig', () => {
+    it('should insert a data hub config', async () => {
       const actor = actors['alpha@example.com'];
       const account = accounts['alpha@example.com'].account;
-      let record = await brDataHubStorage.insertKey({
-        actor,
-        accountId: account.id,
-        key: mockData.masterKey
-      });
+      const config = {...mockData.config, controller: account.id};
+      let record = await brDataHubStorage.insertConfig({actor, config});
       should.exist(record);
-      record.accountId.should.equal(database.hash(account.id));
-      record.key.should.deep.equal(mockData.masterKey);
-      record = await database.collections.dataHubKey.findOne({
-        accountId: database.hash(account.id)
+      record.controller.should.equal(database.hash(account.id));
+      record.id.should.equal(database.hash(record.config.id));
+      dataHubId = record.config.id;
+      record.config.should.deep.equal(config);
+      record = await database.collections.dataHubConfig.findOne({
+        id: database.hash(config.id)
       });
-      record.accountId.should.equal(database.hash(account.id));
-      record.key.should.deep.equal(mockData.masterKey);
+      record.controller.should.equal(database.hash(account.id));
+      record.config.should.deep.equal(config);
     });
-    it('should fail for another account', async () => {
+    it('should fail for another data hub', async () => {
       const actor = actors['alpha@example.com'];
       let err;
       let record;
       try {
-        record = await brDataHubStorage.insertKey({
-          actor,
-          accountId: 'urn:uuid:something-else',
-          key: mockData.masterKey
-        });
+        const config = {
+          ...mockData.config,
+          controller: 'urn:uuid:something-else'
+        };
+        record = await brDataHubStorage.insertConfig({actor, config});
       } catch(e) {
         err = e;
       }
@@ -52,55 +52,56 @@ describe('bedrock-data-hub-storage', () => {
       should.not.exist(record);
       err.name.should.equal('PermissionDenied');
     });
-  }); // end `insertKey`
+  }); // end `insertConfig`
 
   describe('insert', () => {
-    it('should insert an encrypted document', async () => {
+    it('should insert a document', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
       let record = await brDataHubStorage.insert({
         actor,
-        accountId: account.id,
-        doc: mockData.encryptedDocument
+        dataHubId,
+        doc: mockData.doc1
       });
       should.exist(record);
-      record.accountId.should.equal(database.hash(account.id));
-      record.doc.should.deep.equal(mockData.encryptedDocument);
-      record = await database.collections.dataHub.findOne({
-        accountId: database.hash(account.id),
-        id: database.hash(mockData.encryptedDocument.id)
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.id.should.equal(database.hash(mockData.doc1.id));
+      record.doc.should.deep.equal(mockData.doc1);
+      record = await database.collections.dataHubDoc.findOne({
+        dataHubId: database.hash(dataHubId),
+        id: database.hash(mockData.doc1.id)
       });
-      record.accountId.should.equal(database.hash(account.id));
-      record.doc.should.deep.equal(mockData.encryptedDocument);
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.id.should.equal(database.hash(mockData.doc1.id));
+      record.doc.should.deep.equal(mockData.doc1);
     });
-    it('should insert an encrypted document with attribute', async () => {
+    it('should insert a document with an attribute', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
       let record = await brDataHubStorage.insert({
         actor,
-        accountId: account.id,
-        doc: mockData.encryptedDocumentWithAttribute
+        dataHubId,
+        doc: mockData.docWithAttributes
       });
       should.exist(record);
-      record.accountId.should.equal(database.hash(account.id));
-      record.doc.should.deep.equal(mockData.encryptedDocumentWithAttribute);
-      record = await database.collections.dataHub.findOne({
-        accountId: database.hash(account.id),
-        id: database.hash(mockData.encryptedDocumentWithAttribute.id)
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.id.should.equal(database.hash(mockData.docWithAttributes.id));
+      record.doc.should.deep.equal(mockData.docWithAttributes);
+      record = await database.collections.dataHubDoc.findOne({
+        dataHubId: database.hash(dataHubId),
+        id: database.hash(mockData.docWithAttributes.id)
       });
-      record.accountId.should.equal(database.hash(account.id));
-      record.doc.should.deep.equal(mockData.encryptedDocumentWithAttribute);
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.id.should.equal(database.hash(mockData.docWithAttributes.id));
+      record.doc.should.deep.equal(mockData.docWithAttributes);
     });
-    it('should return error on duplicate encrypted document', async () => {
+    it('should return error on duplicate document', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
-      // attempt to insert the same account again
+      // attempt to insert the same document again
       let err;
       try {
         await brDataHubStorage.insert({
           actor,
-          accountId: account.id,
-          doc: mockData.encryptedDocument
+          dataHubId,
+          doc: mockData.doc1
         });
       } catch(e) {
         err = e;
@@ -108,15 +109,15 @@ describe('bedrock-data-hub-storage', () => {
       should.exist(err);
       err.name.should.equal('DuplicateError');
     });
-    it('should fail for another account', async () => {
+    it('should fail for another data hub', async () => {
       const actor = actors['alpha@example.com'];
       let err;
       let record;
       try {
         record = await brDataHubStorage.insert({
           actor,
-          accountId: 'urn:uuid:something-else',
-          doc: mockData.encryptedDocument
+          dataHubId: 'urn:uuid:something-else',
+          doc: mockData.doc1
         });
       } catch(e) {
         err = e;
@@ -128,46 +129,39 @@ describe('bedrock-data-hub-storage', () => {
   }); // end `insert`
 
   describe('update', () => {
-    it('should upsert an encrypted document', async () => {
+    it('should upsert a document', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
-      await brDataHubStorage.update({
-        actor,
-        accountId: account.id,
-        doc: mockData.encryptedDocument2
-      });
-      const record = await database.collections.dataHub.findOne({
-        accountId: database.hash(account.id),
-        id: database.hash(mockData.encryptedDocument2.id)
+      await brDataHubStorage.update({actor, dataHubId, doc: mockData.doc2});
+      const record = await database.collections.dataHubDoc.findOne({
+        dataHubId: database.hash(dataHubId),
+        id: database.hash(mockData.doc2.id)
       });
       should.exist(record);
-      record.accountId.should.equal(database.hash(account.id));
-      record.doc.should.deep.equal(mockData.encryptedDocument2);
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.id.should.equal(database.hash(mockData.doc2.id));
+      record.doc.should.deep.equal(mockData.doc2);
     });
-    it('should update an encrypted document', async () => {
+    it('should update a document', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
-      await brDataHubStorage.update({
-        actor,
-        accountId: account.id,
-        doc: mockData.encryptedDocument
+      const doc = {...mockData.doc1, sequence: 1};
+      await brDataHubStorage.update({actor, dataHubId, doc});
+      const record = await database.collections.dataHubDoc.findOne({
+        dataHubId: database.hash(dataHubId),
+        id: database.hash(mockData.doc1.id)
       });
-      const record = await database.collections.dataHub.findOne({
-        accountId: database.hash(account.id),
-        id: database.hash(mockData.encryptedDocument.id)
-      });
-      record.accountId.should.equal(database.hash(account.id));
-      record.doc.should.deep.equal(mockData.encryptedDocument);
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.id.should.equal(database.hash(mockData.doc1.id));
+      record.doc.should.deep.equal(doc);
     });
-    it('should fail for another account', async () => {
+    it('should fail for another data hub', async () => {
       const actor = actors['alpha@example.com'];
       let err;
       let record;
       try {
         record = await brDataHubStorage.update({
           actor,
-          accountId: 'urn:uuid:something-else',
-          doc: mockData.encryptedDocument
+          dataHubId: 'urn:uuid:something-else',
+          doc: mockData.doc1
         });
       } catch(e) {
         err = e;
@@ -179,26 +173,25 @@ describe('bedrock-data-hub-storage', () => {
   }); // end `update`
 
   describe('get', () => {
-    it('should get an encrypted document', async () => {
+    it('should get a document', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
       const record = await brDataHubStorage.get({
         actor,
-        accountId: account.id,
-        id: mockData.encryptedDocument.id
+        dataHubId,
+        id: mockData.doc1.id
       });
       should.exist(record);
-      record.doc.should.deep.equal(mockData.encryptedDocument);
+      record.doc.should.deep.equal({...mockData.doc1, sequence: 1});
     });
-    it('should fail for another account', async () => {
+    it('should fail for another data hub', async () => {
       const actor = actors['alpha@example.com'];
       let err;
       let record;
       try {
         record = await brDataHubStorage.get({
           actor,
-          accountId: 'urn:uuid:something-else',
-          id: mockData.encryptedDocument.id
+          dataHubId: 'urn:uuid:something-else',
+          id: mockData.doc1.id
         });
       } catch(e) {
         err = e;
@@ -209,13 +202,12 @@ describe('bedrock-data-hub-storage', () => {
     });
     it('should get not found error', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
       let err;
       let record;
       try {
         record = await brDataHubStorage.get({
           actor,
-          accountId: account.id,
+          dataHubId,
           id: 'urn:does-not-exist'
         });
       } catch(e) {
@@ -228,15 +220,16 @@ describe('bedrock-data-hub-storage', () => {
   }); // end `get`
 
   describe('find', () => {
-    it('should get an encrypted document by attribute', async () => {
+    it('should get a document by attribute', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
-      const [attribute] = mockData.encryptedDocumentWithAttribute.attributes;
+      const entry = mockData.docWithAttributes.indexed[0];
+      const [attribute] = entry.attributes;
       const records = await brDataHubStorage.find({
         actor,
-        accountId: account.id,
+        dataHubId,
         query: {
-          'doc.attributes.name': {
+          'doc.indexed.hmac.id': entry.hmac.id,
+          'doc.indexed.attributes.name': {
             $all: [attribute.name]
           }
         }
@@ -244,18 +237,19 @@ describe('bedrock-data-hub-storage', () => {
       should.exist(records);
       records.length.should.equal(1);
       const [record] = records;
-      record.accountId.should.equal(database.hash(account.id));
-      record.doc.should.deep.equal(mockData.encryptedDocumentWithAttribute);
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.doc.should.deep.equal(mockData.docWithAttributes);
     });
-    it('should get an encrypted document by attribute and value', async () => {
+    it('should get a document by attribute and value', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
-      const [attribute] = mockData.encryptedDocumentWithAttribute.attributes;
+      const entry = mockData.docWithAttributes.indexed[0];
+      const [attribute] = entry.attributes;
       const records = await brDataHubStorage.find({
         actor,
-        accountId: account.id,
+        dataHubId,
         query: {
-          'doc.attributes': {
+          'doc.indexed.hmac.id': entry.hmac.id,
+          'doc.indexed.attributes': {
             $all: [{$elemMatch: attribute}]
           }
         }
@@ -263,17 +257,18 @@ describe('bedrock-data-hub-storage', () => {
       should.exist(records);
       records.length.should.equal(1);
       const [record] = records;
-      record.accountId.should.equal(database.hash(account.id));
-      record.doc.should.deep.equal(mockData.encryptedDocumentWithAttribute);
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.doc.should.deep.equal(mockData.docWithAttributes);
     });
     it('should find no results', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
+      const entry = mockData.docWithAttributes.indexed[0];
       const records = await brDataHubStorage.find({
         actor,
-        accountId: account.id,
+        dataHubId,
         query: {
-          'doc.attributes': {
+          'doc.indexed.hmac.id': entry.hmac.id,
+          'doc.indexed.attributes': {
             $all: [{$elemMatch: {name: 'foo', value: 'does-not-exist'}}]
           }
         }
@@ -281,16 +276,18 @@ describe('bedrock-data-hub-storage', () => {
       should.exist(records);
       records.length.should.equal(0);
     });
-    it('should fail for another account', async () => {
+    it('should fail for another data hub', async () => {
       const actor = actors['alpha@example.com'];
+      const entry = mockData.docWithAttributes.indexed[0];
       let err;
       let records;
       try {
         records = await brDataHubStorage.find({
           actor,
-          accountId: 'urn:uuid:something-else',
+          dataHubId: 'urn:uuid:something-else',
           query: {
-            'doc.attributes': {
+            'doc.indexed.hmac.id': entry.hmac.id,
+            'doc.indexed.attributes': {
               $all: [{$elemMatch: {name: 'foo', value: 'does-not-exist'}}]
             }
           }
@@ -305,35 +302,33 @@ describe('bedrock-data-hub-storage', () => {
   }); // end `find`
 
   describe('remove', () => {
-    it('should remove an encrypted document', async () => {
+    it('should remove a document', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
       const result = await brDataHubStorage.remove({
         actor,
-        accountId: account.id,
-        id: mockData.encryptedDocument.id
+        dataHubId,
+        id: mockData.doc1.id
       });
       should.exist(result);
       result.should.equal(true);
-      const record = await database.collections.dataHub.findOne({
-        accountId: database.hash(account.id),
-        id: database.hash(mockData.encryptedDocument.id)
+      const record = await database.collections.dataHubDoc.findOne({
+        dataHubId: database.hash(dataHubId),
+        id: database.hash(mockData.doc1.id)
       });
       should.not.exist(record);
     });
     it('should return `false` for a missing document', async () => {
       const actor = actors['alpha@example.com'];
-      const account = accounts['alpha@example.com'].account;
       const result = await brDataHubStorage.remove({
         actor,
-        accountId: account.id,
-        id: mockData.encryptedDocument.id
+        dataHubId,
+        id: mockData.doc1.id
       });
       should.exist(result);
       result.should.equal(false);
-      const record = await database.collections.dataHub.findOne({
-        accountId: database.hash(account.id),
-        id: database.hash(mockData.encryptedDocument.id)
+      const record = await database.collections.dataHubDoc.findOne({
+        dataHubId: database.hash(dataHubId),
+        id: database.hash(mockData.doc1.id)
       });
       should.not.exist(record);
     });
@@ -344,8 +339,8 @@ describe('bedrock-data-hub-storage', () => {
       try {
         records = await brDataHubStorage.remove({
           actor,
-          accountId: 'urn:uuid:something-else',
-          id: mockData.encryptedDocument.id
+          dataHubId: 'urn:uuid:something-else',
+          id: mockData.doc1.id
         });
       } catch(e) {
         err = e;
