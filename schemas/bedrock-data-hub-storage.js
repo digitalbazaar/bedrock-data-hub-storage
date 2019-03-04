@@ -134,6 +134,9 @@ const indexedEntry = {
           },
           value: {
             type: 'string'
+          },
+          unique: {
+            type: 'boolean'
           }
         }
       }]
