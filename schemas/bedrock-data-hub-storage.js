@@ -19,6 +19,7 @@ const dataHubConfig = {
     kek: {
       type: 'object',
       required: ['id', 'algorithm'],
+      additionalProperties: false,
       properties: {
         id: {
           type: 'string'
@@ -31,6 +32,7 @@ const dataHubConfig = {
     hmac: {
       type: 'object',
       required: ['id', 'algorithm'],
+      additionalProperties: false,
       properties: {
         id: {
           type: 'string'
@@ -39,6 +41,13 @@ const dataHubConfig = {
           type: 'string'
         }
       }
+    },
+    sequence: {
+      type: 'integer',
+      minimum: 0
+    },
+    primary: {
+      type: 'boolean'
     }
   }
 };
@@ -47,6 +56,7 @@ const jwe = {
   title: 'JWE with at least one recipient',
   type: 'object',
   required: ['protected', 'recipients', 'iv', 'ciphertext', 'tag'],
+  additionalProperties: false,
   properties: {
     protected: {
       type: 'string'
@@ -56,13 +66,20 @@ const jwe = {
       minItems: 1,
       items: [{
         type: 'object',
-        required: ['alg', 'kid', 'encrypted_key'],
+        required: ['header', 'encrypted_key'],
+        additionalProperties: false,
         properties: {
-          alg: {
-            type: 'string'
-          },
-          kid: {
-            type: 'string'
+          header: {
+            type: 'object',
+            required: ['alg', 'kid'],
+            properties: {
+              alg: {
+                type: 'string'
+              },
+              kid: {
+                type: 'string'
+              }
+            }
           },
           encrypted_key: {
             type: 'string'
@@ -86,10 +103,12 @@ const indexedEntry = {
   title: 'Data Hub Indexed Entry',
   type: 'object',
   required: ['hmac', 'sequence', 'attributes'],
+  additionalProperties: false,
   properties: {
     hmac: {
       type: 'object',
       required: ['id', 'algorithm'],
+      additionalProperties: false,
       properties: {
         id: {
           type: 'string'
@@ -100,13 +119,15 @@ const indexedEntry = {
       }
     },
     sequence: {
-      type: 'number'
+      type: 'integer',
+      minimum: 0
     },
     attributes: {
       type: 'array',
       items: [{
         type: 'object',
         required: ['name', 'value'],
+        additionalProperties: false,
         properties: {
           name: {
             type: 'string'
@@ -130,7 +151,8 @@ const dataHubDocument = {
       type: 'string'
     },
     sequence: {
-      type: 'number'
+      type: 'integer',
+      minimum: 0
     },
     indexed: {
       type: 'array',

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2018 Digital Bazaar, Inc. All rights reserved.
+/*!
+ * Copyright (c) 2018-2019 Digital Bazaar, Inc. All rights reserved.
  */
 'use strict';
 
@@ -17,6 +17,7 @@ const mockData = require('./mock.data');
 let actors;
 let accounts;
 let urls;
+let dataHubId;
 
 // auto-pass authentication checks
 const brPassport = require('bedrock-passport');
@@ -37,67 +38,50 @@ describe('bedrock-data-hub-storage HTTP API', () => {
     accounts = mockData.accounts;
 
     // common URLs
-    const account = accounts['alpha@example.com'].account;
     const {baseUri} = config.server;
-    const root = `${baseUri}/data-hub/${encodeURIComponent(account.id)}`;
-    const invalid = `${baseUri}/data-hub/invalid`;
+    const root = `${baseUri}/data-hubs`;
+    const invalid = `${baseUri}/data-hubs/invalid`;
     urls = {
-      documents: `${root}/documents`,
-      masterKey: `${root}/master-key`,
-      query: `${root}/query`,
+      dataHubs: root,
       invalidDocuments: `${invalid}/documents`,
-      invalidMasterKey: `${invalid}/master-key`,
       invalidQuery: `${invalid}/query`
     };
   });
 
-  describe('insertKey', () => {
-    it('should fail without `If-None-Match`', async () => {
-      let err;
-      try {
-        await axios.put(
-          urls.masterKey, mockData.masterKey,
-          {headers: {'x-test-account': 'alpha@example.com'}});
-      } catch(e) {
-        err = e;
-      }
-      should.exist(err);
-      should.exist(err.response);
-      err.response.status.should.equal(400);
-    });
-    it('should create a master key', async () => {
-      const response = await axios.put(
-        urls.masterKey, mockData.masterKey,
+  describe('insertConfig', () => {
+    it('should create a data hub', async () => {
+      const account = accounts['alpha@example.com'].account;
+      const config = {
+        ...mockData.config,
+        controller: account.id,
+        primary: false
+      };
+      delete config.id;
+      const response = await axios.post(
+        urls.dataHubs, config,
         {headers: {
-          'x-test-account': 'alpha@example.com',
-          'if-none-match': '*'
+          'x-test-account': 'alpha@example.com'
         }});
-      response.status.should.equal(204);
-    });
-    it('should return not modified', async () => {
-      let err;
-      try {
-        await axios.put(
-          urls.masterKey, mockData.masterKey,
-          {headers: {
-            'x-test-account': 'alpha@example.com',
-            'if-none-match': '*'
-          }});
-      } catch(e) {
-        err = e;
-      }
-      should.exist(err);
-      should.exist(err.response);
-      err.response.status.should.equal(304);
+      response.status.should.equal(201);
+      response.data.should.be.an('object');
+      response.data.id.should.be.a('string');
+      config.id = response.data.id;
+      response.data.should.deep.equal(config);
+
+      // TODO: rework test suite to avoid shared state
+      // update state used in other tests
+      dataHubId = config.id;
+      urls.documents = `${urls.dataHubs}/${dataHubId}/documents`;
+      urls.query = `${urls.dataHubs}/${dataHubId}/query`;
     });
     it('should fail for another account', async () => {
       let err;
       try {
-        await axios.put(
-          urls.invalidMasterKey, mockData.masterKey,
+        const config = {...mockData.config, controller: 'urn:other:account'};
+        await axios.post(
+          urls.dataHubs, config,
           {headers: {
-            'x-test-account': 'alpha@example.com',
-            'if-none-match': '*'
+            'x-test-account': 'alpha@example.com'
           }});
       } catch(e) {
         err = e;
@@ -107,33 +91,32 @@ describe('bedrock-data-hub-storage HTTP API', () => {
       err.response.status.should.equal(403);
       err.response.data.type.should.equal('PermissionDenied');
     });
-  }); // end `insertKey`
+  }); // end `insertConfig`
 
   describe('insert', () => {
-    it('should insert an encrypted document', async () => {
+    it('should insert a document', async () => {
       const response = await axios.post(
-        urls.documents, mockData.encryptedDocument,
+        urls.documents, mockData.doc1,
         {headers: {'x-test-account': 'alpha@example.com'}});
       response.status.should.equal(201);
       response.headers.location.should.equal(
         urls.documents + '/' +
-        encodeURIComponent(mockData.encryptedDocument.id));
+        encodeURIComponent(mockData.doc1.id));
     });
-    it('should insert an encrypted document with attribute', async () => {
+    it('should insert a document with attributes', async () => {
       const response = await axios.post(
-        urls.documents, mockData.encryptedDocumentWithAttribute,
+        urls.documents, mockData.docWithAttributes,
         {headers: {'x-test-account': 'alpha@example.com'}});
       response.status.should.equal(201);
       response.headers.location.should.equal(
         urls.documents + '/' +
-        encodeURIComponent(mockData.encryptedDocumentWithAttribute.id));
+        encodeURIComponent(mockData.docWithAttributes.id));
     });
-    it('should return error on duplicate encrypted document', async () => {
-      // attempt to insert the same account again
+    it('should return error on duplicate document', async () => {
       let err;
       try {
         await axios.post(
-          urls.documents, mockData.encryptedDocument,
+          urls.documents, mockData.doc1,
           {headers: {'x-test-account': 'alpha@example.com'}});
       } catch(e) {
         err = e;
@@ -143,11 +126,11 @@ describe('bedrock-data-hub-storage HTTP API', () => {
       err.response.status.should.equal(409);
       err.response.data.type.should.equal('DuplicateError');
     });
-    it('should not insert for another account', async () => {
+    it('should not insert for another data hub', async () => {
       let err;
       try {
         await axios.post(
-          urls.invalidDocuments, mockData.encryptedDocument,
+          urls.invalidDocuments, mockData.doc1,
           {headers: {'x-test-account': 'alpha@example.com'}});
       } catch(e) {
         err = e;
@@ -160,32 +143,33 @@ describe('bedrock-data-hub-storage HTTP API', () => {
   }); // end `insert`
 
   describe('update', () => {
-    it('should upsert an encrypted document', async () => {
+    it('should upsert a document', async () => {
       const url =
         urls.documents + '/' +
-        encodeURIComponent(mockData.encryptedDocument2.id);
-      const response = await axios.put(
-        url, mockData.encryptedDocument2,
+        encodeURIComponent(mockData.doc2.id);
+      const response = await axios.post(
+        url, mockData.doc2,
         {headers: {'x-test-account': 'alpha@example.com'}});
       response.status.should.equal(204);
     });
-    it('should update an encrypted document', async () => {
+    it('should update a document', async () => {
       const url =
         urls.documents + '/' +
-        encodeURIComponent(mockData.encryptedDocument.id);
-      const response = await axios.put(
-        url, mockData.encryptedDocument,
+        encodeURIComponent(mockData.doc1.id);
+      const doc = {...mockData.doc1, sequence: 1};
+      const response = await axios.post(
+        url, doc,
         {headers: {'x-test-account': 'alpha@example.com'}});
       response.status.should.equal(204);
     });
-    it('should fail for another account', async () => {
+    it('should fail for another data hub', async () => {
       const url =
         urls.invalidDocuments + '/' +
-        encodeURIComponent(mockData.encryptedDocument.id);
+        encodeURIComponent(mockData.doc1.id);
       let err;
       try {
-        await axios.put(
-          url, mockData.encryptedDocument,
+        await axios.post(
+          url, mockData.doc1,
           {headers: {'x-test-account': 'alpha@example.com'}});
       } catch(e) {
         err = e;
@@ -198,19 +182,19 @@ describe('bedrock-data-hub-storage HTTP API', () => {
   }); // end `update`
 
   describe('get', () => {
-    it('should get an encrypted document', async () => {
+    it('should get a document', async () => {
       const url =
         urls.documents + '/' +
-        encodeURIComponent(mockData.encryptedDocument.id);
+        encodeURIComponent(mockData.doc1.id);
       const response = await axios.get(
         url, {headers: {'x-test-account': 'alpha@example.com'}});
       response.status.should.equal(200);
-      response.data.should.deep.equal(mockData.encryptedDocument);
+      response.data.should.deep.equal({...mockData.doc1, sequence: 1});
     });
-    it('should fail for another account', async () => {
+    it('should fail for another data hub', async () => {
       const url =
         urls.invalidDocuments + '/' +
-        encodeURIComponent(mockData.encryptedDocument.id);
+        encodeURIComponent(mockData.doc1.id);
       let err;
       try {
         await axios.get(
@@ -240,9 +224,11 @@ describe('bedrock-data-hub-storage HTTP API', () => {
   }); // end `get`
 
   describe('find', () => {
-    it('should get an encrypted document by attribute', async () => {
-      const [attribute] = mockData.encryptedDocumentWithAttribute.attributes;
+    it('should get a document by attribute', async () => {
+      const entry = mockData.docWithAttributes.indexed[0];
+      const [attribute] = entry.attributes;
       const query = {
+        index: entry.hmac.id,
         has: [attribute.name]
       };
       const response = await axios.post(
@@ -250,12 +236,13 @@ describe('bedrock-data-hub-storage HTTP API', () => {
       response.status.should.equal(200);
       response.data.should.be.an('array');
       response.data.length.should.equal(1);
-      response.data[0].should.deep.equal(
-        mockData.encryptedDocumentWithAttribute);
+      response.data[0].should.deep.equal(mockData.docWithAttributes);
     });
-    it('should get an encrypted document by attribute and value', async () => {
-      const [attribute] = mockData.encryptedDocumentWithAttribute.attributes;
+    it('should get a document by attribute and value', async () => {
+      const entry = mockData.docWithAttributes.indexed[0];
+      const [attribute] = entry.attributes;
       const query = {
+        index: entry.hmac.id,
         equals: [{[attribute.name]: attribute.value}]
       };
       const response = await axios.post(
@@ -263,11 +250,12 @@ describe('bedrock-data-hub-storage HTTP API', () => {
       response.status.should.equal(200);
       response.data.should.be.an('array');
       response.data.length.should.equal(1);
-      response.data[0].should.deep.equal(
-        mockData.encryptedDocumentWithAttribute);
+      response.data[0].should.deep.equal(mockData.docWithAttributes);
     });
     it('should find no results', async () => {
+      const entry = mockData.docWithAttributes.indexed[0];
       const query = {
+        index: entry.hmac.id,
         equals: [{foo: 'does-not-exist'}]
       };
       const response = await axios.post(
@@ -276,8 +264,10 @@ describe('bedrock-data-hub-storage HTTP API', () => {
       response.data.should.be.an('array');
       response.data.length.should.equal(0);
     });
-    it('should fail for another account', async () => {
+    it('should fail for another data hub', async () => {
+      const entry = mockData.docWithAttributes.indexed[0];
       const query = {
+        index: entry.hmac.id,
         equals: [{foo: 'does-not-exist'}]
       };
       let err;
@@ -296,10 +286,10 @@ describe('bedrock-data-hub-storage HTTP API', () => {
   }); // end `find`
 
   describe('delete', () => {
-    it('should delete an encrypted document', async () => {
+    it('should delete a document', async () => {
       const url =
         urls.documents + '/' +
-        encodeURIComponent(mockData.encryptedDocument.id);
+        encodeURIComponent(mockData.doc1.id);
       const response = await axios.delete(
         url, {headers: {'x-test-account': 'alpha@example.com'}});
       response.status.should.equal(204);
@@ -307,7 +297,7 @@ describe('bedrock-data-hub-storage HTTP API', () => {
     it('should return 404 for a missing document', async () => {
       const url =
         urls.documents + '/' +
-        encodeURIComponent(mockData.encryptedDocument.id);
+        encodeURIComponent(mockData.doc1.id);
       let err;
       try {
         await axios.delete(
@@ -319,10 +309,10 @@ describe('bedrock-data-hub-storage HTTP API', () => {
       should.exist(err.response);
       err.response.status.should.equal(404);
     });
-    it('should fail for another account', async () => {
+    it('should fail for another data hub', async () => {
       const url =
         urls.invalidDocuments + '/' +
-        encodeURIComponent(mockData.encryptedDocument.id);
+        encodeURIComponent(mockData.doc1.id);
       let err;
       try {
         await axios.delete(

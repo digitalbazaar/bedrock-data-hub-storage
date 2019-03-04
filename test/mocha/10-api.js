@@ -11,7 +11,7 @@ let actors;
 let accounts;
 let dataHubId;
 
-describe.only('bedrock-data-hub-storage', () => {
+describe('bedrock-data-hub-storage', () => {
   before(async () => {
     await helpers.prepareDatabase(mockData);
     actors = await helpers.getActors(mockData);
