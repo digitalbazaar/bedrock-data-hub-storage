@@ -131,8 +131,5 @@ data.docWithAttributes = {
     "iv": "i8Nins2vTI3PlrYW",
     "ciphertext": "Cb-963UCXblINT8F6MDHzMJN9EAhK3I",
     "tag": "pfZO0JulJcrc3trOZy8rjA"
-  },
-  "content": {
-    "indexedKey": "value1"
   }
 };
