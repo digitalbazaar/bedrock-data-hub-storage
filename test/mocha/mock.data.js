@@ -133,3 +133,40 @@ data.docWithAttributes = {
     "tag": "pfZO0JulJcrc3trOZy8rjA"
   }
 };
+
+data.docWithUniqueAttributes = {
+  "id": "hasUniqueAttributes1",
+  "sequence": 0,
+  "indexed": [
+    {
+      "hmac": {
+        "id": "13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e",
+        "algorithm": "HS256"
+      },
+      "sequence": 0,
+      "attributes": [
+        {
+          "name": "CUQaxPtSLtd8L3WBAIkJ4DiVJeqoF6bdnhR7lSaPloZ",
+          "value": "QV58Va4904K-18_L5g_vfARXRWEB00knFSGPpukUBro",
+          "unique": true
+        }
+      ]
+    }
+  ],
+  "jwe": {
+    "protected": "eyJlbmMiOiJDMjBQIn0",
+    "recipients": [
+      {
+        "header": {
+          "alg": "A256KW",
+          "kid": "f3ce1a43-162f-43b2-80b4-b51abbeea46e"
+        },
+        "encrypted_key":
+          "OR1vdCNvf_B68mfUxFQVT-vyXVrBembuiM40mAAjDC1-Qu5iArDbug"
+      }
+    ],
+    "iv": "i8Nins2vTI3PlrYW",
+    "ciphertext": "Cb-963UCXblINT8F6MDHzMJN9EAhK3I",
+    "tag": "pfZO0JulJcrc3trOZy8rjA"
+  }
+};
