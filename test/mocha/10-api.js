@@ -114,7 +114,7 @@ describe('bedrock-data-hub-storage', () => {
         database.hash(mockData.docWithUniqueAttributes.id));
       record.doc.should.deep.equal(mockData.docWithUniqueAttributes);
     });
-    it.skip('should fail to insert a document with a unique attribute', async () => {
+    it('should detect a duplicate with a unique attribute', async () => {
       const actor = actors['alpha@example.com'];
       const doc = {...mockData.docWithUniqueAttributes};
       doc.id = 'aDifferentId';
@@ -130,6 +130,27 @@ describe('bedrock-data-hub-storage', () => {
       }
       should.exist(err);
       err.name.should.equal('DuplicateError');
+    });
+    it('should insert a document with non-conflicting attribute', async () => {
+      const actor = actors['alpha@example.com'];
+      let record = await brDataHubStorage.insert({
+        actor,
+        dataHubId,
+        doc: mockData.docWithUniqueAttributes2
+      });
+      should.exist(record);
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.id.should.equal(
+        database.hash(mockData.docWithUniqueAttributes2.id));
+      record.doc.should.deep.equal(mockData.docWithUniqueAttributes2);
+      record = await database.collections.dataHubDoc.findOne({
+        dataHubId: database.hash(dataHubId),
+        id: database.hash(mockData.docWithUniqueAttributes2.id)
+      });
+      record.dataHubId.should.equal(database.hash(dataHubId));
+      record.id.should.equal(
+        database.hash(mockData.docWithUniqueAttributes2.id));
+      record.doc.should.deep.equal(mockData.docWithUniqueAttributes2);
     });
     it('should return error on duplicate document', async () => {
       const actor = actors['alpha@example.com'];
