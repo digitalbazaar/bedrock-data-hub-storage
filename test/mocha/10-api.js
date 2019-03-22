@@ -131,6 +131,23 @@ describe('bedrock-data-hub-storage', () => {
       should.exist(err);
       err.name.should.equal('DuplicateError');
     });
+    it('should detect an upsert duplicate', async () => {
+      const actor = actors['alpha@example.com'];
+      const doc = {...mockData.docWithUniqueAttributes};
+      doc.id = 'aDifferentId';
+      let err;
+      try {
+        await brDataHubStorage.update({
+          actor,
+          dataHubId,
+          doc
+        });
+      } catch(e) {
+        err = e;
+      }
+      should.exist(err);
+      err.name.should.equal('DuplicateError');
+    });
     it('should insert a document with non-conflicting attribute', async () => {
       const actor = actors['alpha@example.com'];
       let record = await brDataHubStorage.insert({
