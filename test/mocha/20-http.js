@@ -54,7 +54,7 @@ describe('bedrock-data-hub-storage HTTP API', () => {
       const config = {
         ...mockData.config,
         controller: account.id,
-        primary: false
+        referenceId: 'primary'
       };
       delete config.id;
       const response = await axios.post(
@@ -71,8 +71,8 @@ describe('bedrock-data-hub-storage HTTP API', () => {
       // TODO: rework test suite to avoid shared state
       // update state used in other tests
       dataHubId = config.id;
-      urls.documents = `${urls.dataHubs}/${dataHubId}/documents`;
-      urls.query = `${urls.dataHubs}/${dataHubId}/query`;
+      urls.documents = `${dataHubId}/documents`;
+      urls.query = `${dataHubId}/query`;
     });
     it('should fail for another account', async () => {
       let err;

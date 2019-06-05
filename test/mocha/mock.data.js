@@ -22,18 +22,19 @@ accounts[email].meta.sysResourceRole = [{
   generateResource: 'id'
 }];
 
+data.baseUrl = 'https://bedrock.localhost:18443';
+
 data.config = {
-  "id": "e77fff16-3e0e-11e9-ab58-10bf48838a41",
+  "id": `${data.baseUrl}/data-hubs/e77fff16-3e0e-11e9-ab58-10bf48838a41`,
   "sequence": 0,
   "kek": {
-    "id": "f3ce1a43-162f-43b2-80b4-b51abbeea46e",
-    "algorithm": "A256KW"
+    "id": `${data.baseUrl}/kms/f3ce1a43-162f-43b2-80b4-b51abbeea46e`,
+    "type": "AesKeyWrappingKey2019"
   },
   "hmac": {
-    "id": "13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e",
-    "algorithm": "HS256"
-  },
-  "primary": true
+    "id": `${data.baseUrl}/kms/13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e`,
+    "type": "Sha256HmacKey2019"
+  }
 };
 
 data.doc1 = {
@@ -42,8 +43,8 @@ data.doc1 = {
   "indexed": [
     {
       "hmac": {
-        "id": "13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e",
-        "algorithm": "HS256"
+        "id": `${data.baseUrl}/kms/13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e`,
+        "type": "Sha256HmacKey2019"
       },
       "sequence": 0,
       "attributes": []
@@ -55,7 +56,7 @@ data.doc1 = {
       {
         "header": {
           "alg": "A256KW",
-          "kid": "f3ce1a43-162f-43b2-80b4-b51abbeea46e"
+          "kid": `${data.baseUrl}/kms/f3ce1a43-162f-43b2-80b4-b51abbeea46e`
         },
         "encrypted_key":
           "HM00migkUSdZjvqmq4b7ixiXnfeLieA7QX2ew6OF4oPUA3HovaMnOw"
@@ -73,8 +74,8 @@ data.doc2 = {
   "indexed": [
     {
       "hmac": {
-        "id": "13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e",
-        "algorithm": "HS256"
+        "id": `${data.baseUrl}/kms/13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e`,
+        "type": "Sha256HmacKey2019"
       },
       "sequence": 0,
       "attributes": []
@@ -86,7 +87,7 @@ data.doc2 = {
       {
         "header": {
           "alg": "A256KW",
-          "kid": "f3ce1a43-162f-43b2-80b4-b51abbeea46e"
+          "kid": `${data.baseUrl}/kms/f3ce1a43-162f-43b2-80b4-b51abbeea46e`
         },
         "encrypted_key":
           "HM00migkUSdZjvqmq4b7ixiXnfeLieA7QX2ew6OF4oPUA3HovaMnOw"
@@ -104,8 +105,8 @@ data.docWithAttributes = {
   "indexed": [
     {
       "hmac": {
-        "id": "13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e",
-        "algorithm": "HS256"
+        "id": `${data.baseUrl}/kms/13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e`,
+        "type": "Sha256HmacKey2019"
       },
       "sequence": 0,
       "attributes": [
@@ -122,7 +123,7 @@ data.docWithAttributes = {
       {
         "header": {
           "alg": "A256KW",
-          "kid": "f3ce1a43-162f-43b2-80b4-b51abbeea46e"
+          "kid": `${data.baseUrl}/kms/f3ce1a43-162f-43b2-80b4-b51abbeea46e`
         },
         "encrypted_key":
           "OR1vdCNvf_B68mfUxFQVT-vyXVrBembuiM40mAAjDC1-Qu5iArDbug"
@@ -140,8 +141,8 @@ data.docWithUniqueAttributes = {
   "indexed": [
     {
       "hmac": {
-        "id": "13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e",
-        "algorithm": "HS256"
+        "id": `${data.baseUrl}/kms/13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e`,
+        "type": "Sha256HmacKey2019"
       },
       "sequence": 0,
       "attributes": [
@@ -163,7 +164,7 @@ data.docWithUniqueAttributes = {
       {
         "header": {
           "alg": "A256KW",
-          "kid": "f3ce1a43-162f-43b2-80b4-b51abbeea46e"
+          "kid": `${data.baseUrl}/kms/f3ce1a43-162f-43b2-80b4-b51abbeea46e`
         },
         "encrypted_key":
           "OR1vdCNvf_B68mfUxFQVT-vyXVrBembuiM40mAAjDC1-Qu5iArDbug"
@@ -181,8 +182,8 @@ data.docWithUniqueAttributes2 = {
   "indexed": [
     {
       "hmac": {
-        "id": "13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e",
-        "algorithm": "HS256"
+        "id": `${data.baseUrl}/kms/13a91b49-3bd6-4e7a-aacd-4a1e0468bb2e`,
+        "type": "Sha256HmacKey2019"
       },
       "sequence": 0,
       "attributes": [
@@ -206,7 +207,7 @@ data.docWithUniqueAttributes2 = {
       {
         "header": {
           "alg": "A256KW",
-          "kid": "f3ce1a43-162f-43b2-80b4-b51abbeea46e"
+          "kid": `${data.baseUrl}/kms/f3ce1a43-162f-43b2-80b4-b51abbeea46e`
         },
         "encrypted_key":
           "OR1vdCNvf_B68mfUxFQVT-vyXVrBembuiM40mAAjDC1-Qu5iArDbug"
