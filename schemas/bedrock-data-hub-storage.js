@@ -7,7 +7,7 @@ const dataHubConfig = {
   title: 'Data Hub Configuration',
   type: 'object',
   // TODO: do not require primary `kek` and `hmac` in the future
-  required: ['sequence', 'controller', 'kek', 'hmac'],
+  required: ['controller', 'sequence', 'kek', 'hmac'],
   additionalProperties: false,
   properties: {
     id: {
@@ -18,26 +18,26 @@ const dataHubConfig = {
     },
     kek: {
       type: 'object',
-      required: ['id', 'algorithm'],
+      required: ['id', 'type'],
       additionalProperties: false,
       properties: {
         id: {
           type: 'string'
         },
-        algorithm: {
+        type: {
           type: 'string'
         }
       }
     },
     hmac: {
       type: 'object',
-      required: ['id', 'algorithm'],
+      required: ['id', 'type'],
       additionalProperties: false,
       properties: {
         id: {
           type: 'string'
         },
-        algorithm: {
+        type: {
           type: 'string'
         }
       }
@@ -46,8 +46,8 @@ const dataHubConfig = {
       type: 'integer',
       minimum: 0
     },
-    primary: {
-      type: 'boolean'
+    referenceId: {
+      type: 'string'
     }
   }
 };
@@ -107,13 +107,13 @@ const indexedEntry = {
   properties: {
     hmac: {
       type: 'object',
-      required: ['id', 'algorithm'],
+      required: ['id', 'type'],
       additionalProperties: false,
       properties: {
         id: {
           type: 'string'
         },
-        algorithm: {
+        type: {
           type: 'string'
         }
       }
