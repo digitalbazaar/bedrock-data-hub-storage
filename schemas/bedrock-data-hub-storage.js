@@ -16,6 +16,24 @@ const dataHubConfig = {
     controller: {
       type: 'string'
     },
+    invoker: {
+      anyOf: [{
+        type: 'string'
+      }, {
+        type: 'array',
+        minItems: 1,
+        items: [{type: 'string'}]
+      }]
+    },
+    delegator: {
+      anyOf: [{
+        type: 'string'
+      }, {
+        type: 'array',
+        minItems: 1,
+        items: [{type: 'string'}]
+      }]
+    },
     kek: {
       type: 'object',
       required: ['id', 'type'],
