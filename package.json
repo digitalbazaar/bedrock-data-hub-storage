@@ -35,7 +35,8 @@
     "bedrock-permission": "^2.5.0",
     "bedrock-mongodb": "3.x - 5.x",
     "bedrock-server": "^2.3.2",
-    "bedrock-validation": "^4.1.0"
+    "bedrock-validation": "^4.1.0",
+    "bedrock-zcap-storage": "digitalbazaar/bedrock-zcap-storage#initial"
   },
   "directories": {
     "lib": "./lib"
