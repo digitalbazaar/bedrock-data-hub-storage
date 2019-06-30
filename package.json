@@ -23,8 +23,9 @@
   "dependencies": {
     "assert-plus": "^1.0.0",
     "cors": "^2.8.4",
+    "http-signature-header": "^1.3.0",
     "jsonld-signatures": "^4.1.1",
-    "ocapld": "^1.3.0",
+    "ocapld": "^1.2.1",
     "uuid-random": "^1.0.6"
   },
   "peerDependencies": {
