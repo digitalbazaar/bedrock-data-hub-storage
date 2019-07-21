@@ -6,8 +6,8 @@
 const dataHubConfig = {
   title: 'Data Hub Configuration',
   type: 'object',
-  // TODO: do not require primary `kek` and `hmac` in the future
-  required: ['controller', 'sequence', 'kek', 'hmac'],
+  // TODO: do not require primary `keyAgreementKey` and `hmac` in the future
+  required: ['controller', 'sequence', 'keyAgreementKey', 'hmac'],
   additionalProperties: false,
   properties: {
     id: {
@@ -34,7 +34,7 @@ const dataHubConfig = {
         items: [{type: 'string'}]
       }]
     },
-    kek: {
+    keyAgreementKey: {
       type: 'object',
       required: ['id', 'type'],
       additionalProperties: false,
@@ -95,6 +95,15 @@ const jwe = {
                 type: 'string'
               },
               kid: {
+                type: 'string'
+              },
+              epk: {
+                type: 'object'
+              },
+              apu: {
+                type: 'string'
+              },
+              apv: {
                 type: 'string'
               }
             }
