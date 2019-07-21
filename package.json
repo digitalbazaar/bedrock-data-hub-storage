@@ -28,8 +28,7 @@
     "express-async-handler": "^1.1.4",
     "http-signature-zcap-verify": "github:digitalbazaar/http-signature-zcap-verify#initial",
     "jsonld-signatures": "^4.1.1",
-    "ocapld": "^1.2.1",
-    "uuid-random": "^1.0.6"
+    "ocapld": "^1.3.0"
   },
   "peerDependencies": {
     "bedrock": "^1.12.1",
