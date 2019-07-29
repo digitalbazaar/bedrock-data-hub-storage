@@ -192,6 +192,28 @@ const dataHubDocument = {
   }
 };
 
+const dataHubDocumentChunk = {
+  title: 'Data Hub Document Chunk',
+  type: 'object',
+  required: ['index', 'jwe', 'offset', 'sequence'],
+  additionalProperties: false,
+  properties: {
+    index: {
+      type: 'integer',
+      minimum: 0
+    },
+    jwe,
+    offset: {
+      type: 'integer',
+      minimum: 0
+    },
+    sequence: {
+      type: 'integer',
+      minimum: 0
+    }
+  }
+};
+
 const query = {
   title: 'Data Hub Document Query',
   type: 'object',
@@ -225,5 +247,6 @@ const query = {
 };
 
 module.exports.config = () => dataHubConfig;
+module.exports.chunk = () => dataHubDocumentChunk;
 module.exports.document = () => dataHubDocument;
 module.exports.query = () => query;
