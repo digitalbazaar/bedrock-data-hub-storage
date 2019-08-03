@@ -1,6 +1,6 @@
 {
   "name": "bedrock-data-hub-storage",
-  "version": "0.1.1-0",
+  "version": "1.0.0",
   "description": "Bedrock Data Hub Storage",
   "main": "./lib",
   "scripts": {},
